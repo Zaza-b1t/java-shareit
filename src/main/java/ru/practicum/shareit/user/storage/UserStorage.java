@@ -7,13 +7,13 @@ import java.util.Collection;
 public interface UserStorage {
     User create(User user);
 
-    User update (long id,User user);
+    User update(long id,User user);
 
-    User getById (long id);
+    User getById(long id);
 
     Collection<User> getAll();
 
     boolean exists(long id);
 
-    void delete (long id);
+    void delete(long id);
 }

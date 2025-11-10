@@ -7,7 +7,7 @@ import ru.practicum.shareit.user.User;
 import java.util.*;
 
 @Component
-public class InMemoryUserStorage implements UserStorage{
+public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
     private long currentId = 0;
 
@@ -47,7 +47,7 @@ public class InMemoryUserStorage implements UserStorage{
     }
 
     @Override
-    public void delete (long id) {
+    public void delete(long id) {
         if (!exists(id)) {
             throw new EntityNotFoundException("Пользователь с ID = " + id + " не найден.");
         }

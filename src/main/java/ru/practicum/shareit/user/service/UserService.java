@@ -9,13 +9,13 @@ public interface UserService {
 
     UserDto patch(long id, UserDto dto);
 
-    UserDto update (long id, UserDto userDto);
+    UserDto update(long id, UserDto userDto);
 
-    UserDto getById (long id);
+    UserDto getById(long id);
 
     Collection<UserDto> getAll();
 
     boolean exists(long id);
 
-    void delete (long id);
+    void delete(long id);
 }

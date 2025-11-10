@@ -6,7 +6,7 @@ import ru.practicum.shareit.item.model.Item;
 
 @Component
 public class ItemMapper {
-    public ItemDto toItemDto (Item item) {
+    public ItemDto toItemDto(Item item) {
         if (item == null) return null;
         ItemDto dto = new ItemDto();
         dto.setId(item.getId());
@@ -16,7 +16,7 @@ public class ItemMapper {
         return dto;
     }
 
-    public Item toItem (ItemDto dto, Long ownerId) {
+    public Item toItem(ItemDto dto, Long ownerId) {
         if (dto == null) return null;
         Item item = new Item();
         item.setName(dto.getName());

@@ -29,12 +29,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public UserDto getById (@PathVariable long id) {
+    public UserDto getById(@PathVariable long id) {
         return userService.getById(id);
     }
 
     @PostMapping
-    public UserDto create (@Valid @RequestBody UserDto userDto) {
+    public UserDto create(@Valid @RequestBody UserDto userDto) {
         return userService.create(userDto);
     }
 

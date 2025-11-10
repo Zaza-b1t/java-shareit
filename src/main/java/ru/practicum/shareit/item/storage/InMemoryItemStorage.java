@@ -66,7 +66,7 @@ public class InMemoryItemStorage implements ItemStorage {
         String query = text.toLowerCase();
         List<Item> result = new ArrayList<>();
 
-        for(Item item : items.values()) {
+        for (Item item : items.values()) {
             if (Boolean.TRUE.equals(item.isAvailable())) {
                 String name = item.getName() == null ? "" : item.getName().toLowerCase();
                 String desc = item.getDescription() == null ? "" : item.getDescription().toLowerCase();

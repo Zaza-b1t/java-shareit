@@ -11,7 +11,7 @@ public interface ItemService {
 
     ItemDto getById(long id);
 
-    Collection<ItemDto> getByOwner (long id);
+    Collection<ItemDto> getByOwner(long id);
 
     void delete(long ownerId, long id);
 
