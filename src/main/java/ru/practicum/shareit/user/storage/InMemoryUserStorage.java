@@ -30,7 +30,7 @@ public class InMemoryUserStorage implements UserStorage{
 
     @Override
     public User getById(long id) {
-        if(!exists(id)) {
+        if (!exists(id)) {
             throw new EntityNotFoundException("Пользователь с ID = " + id + " не найден.");
         }
         return users.get(id);
@@ -48,7 +48,7 @@ public class InMemoryUserStorage implements UserStorage{
 
     @Override
     public void delete (long id) {
-        if(!exists(id)) {
+        if (!exists(id)) {
             throw new EntityNotFoundException("Пользователь с ID = " + id + " не найден.");
         }
         users.remove(id);

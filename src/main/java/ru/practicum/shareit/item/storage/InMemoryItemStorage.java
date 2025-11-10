@@ -7,7 +7,7 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.*;
 
 @Component
-public class InMemoryItemStorage implements ItemStorage{
+public class InMemoryItemStorage implements ItemStorage {
 
     private final Map<Long,Item> items = new HashMap<>();
     private long currentId = 0;
@@ -21,7 +21,7 @@ public class InMemoryItemStorage implements ItemStorage{
 
     @Override
     public Item update(long id, Item item) {
-        if(!exists(id)) {
+        if (!exists(id)) {
             throw new EntityNotFoundException("Вещь с ID = " + id + " не найден.");
         }
         item.setId(id);
@@ -31,7 +31,7 @@ public class InMemoryItemStorage implements ItemStorage{
 
     @Override
     public Item getById(long id) {
-        if(!exists(id)) {
+        if (!exists(id)) {
             throw new EntityNotFoundException("Вещь с ID = " + id + " не найден.");
         }
         return items.get(id);
@@ -46,7 +46,7 @@ public class InMemoryItemStorage implements ItemStorage{
 
     @Override
     public void delete(long itemId) {
-        if(!exists(itemId)) {
+        if (!exists(itemId)) {
             throw new EntityNotFoundException("Вещь с ID = " + itemId + " не найден.");
         }
         items.remove(itemId);
@@ -59,7 +59,7 @@ public class InMemoryItemStorage implements ItemStorage{
 
     @Override
     public Collection<Item> search(String text) {
-        if(text == null || text.isBlank()) {
+        if (text == null || text.isBlank()) {
             return List.of();
         }
 
@@ -67,11 +67,11 @@ public class InMemoryItemStorage implements ItemStorage{
         List<Item> result = new ArrayList<>();
 
         for(Item item : items.values()) {
-            if(Boolean.TRUE.equals(item.isAvailable())) {
+            if (Boolean.TRUE.equals(item.isAvailable())) {
                 String name = item.getName() == null ? "" : item.getName().toLowerCase();
                 String desc = item.getDescription() == null ? "" : item.getDescription().toLowerCase();
 
-                if(name.contains(query) || desc.contains(query)) {
+                if (name.contains(query) || desc.contains(query)) {
                     result.add(item);
                 }
             }
