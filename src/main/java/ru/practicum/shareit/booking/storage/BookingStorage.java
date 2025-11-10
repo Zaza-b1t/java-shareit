@@ -18,4 +18,6 @@ public interface BookingStorage {
     Collection<Booking> getByOwner(long ownerId);
 
     void delete(long id);
+
+    boolean exists(long id);
 }

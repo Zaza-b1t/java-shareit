@@ -49,7 +49,7 @@ public class BookingServiceImpl implements BookingService {
         toCreate.setStatus(BookingStatus.WAITING);
 
         Booking saved = bookingStorage.create(toCreate);
-        log.debug("Создана бронь id={} для itemId={} bookerId={}", saved.getId(), saved.getItemId(), saved.getBookerId());
+        log.info("Создана бронь id={} для itemId={} bookerId={}", saved.getId(), saved.getItemId(), saved.getBookerId());
 
         return bookingMapper.toBookingDto(saved);
     }
@@ -70,7 +70,7 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
         Booking updated = bookingStorage.update(bookingId, booking);
-        log.debug("Изменён статус брони id={} → {}", bookingId, updated.getStatus());
+        log.info("Изменён статус брони id={} → {}", bookingId, updated.getStatus());
 
         return bookingMapper.toBookingDto(updated);
     }
@@ -87,7 +87,7 @@ public class BookingServiceImpl implements BookingService {
         if (!isBooker && !isOwner) {
             throw new ValidationException("Недостаточно прав для просмотра этой брони.");
         }
-        log.debug("Бронь найдена: {}", bookingId);
+        log.info("Бронь найдена: {}", bookingId);
         return bookingMapper.toBookingDto(booking);
     }
 

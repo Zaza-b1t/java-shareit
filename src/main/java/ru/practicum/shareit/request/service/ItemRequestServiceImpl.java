@@ -25,7 +25,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         log.info("Создание запроса от пользователя requesterId={}", requesterId);
         ItemRequest toCreate = requestMapper.toItemRequest(dto, requesterId);
         ItemRequest saved = requestStorage.create(toCreate);
-        log.debug("Создан запрос id={} от requesterId={}", saved.getId(), saved.getRequesterId());
+        log.info("Создан запрос id={} от requesterId={}", saved.getId(), saved.getRequesterId());
         return requestMapper.toItemRequestDto(saved);
     }
 
@@ -37,7 +37,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public Collection<ItemRequestDto> getAll() {
-        log.debug("Получение всех запросов");
+        log.info("Получение всех запросов");
         return requestStorage.getAll().stream()
                 .map(requestMapper::toItemRequestDto)
                 .collect(Collectors.toList());
@@ -55,7 +55,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public void delete(long requestId) {
         log.info("Удаление запроса id={}", requestId);
         requestStorage.delete(requestId);
-        log.debug("Удалён запрос id={}", requestId);
+        log.info("Удалён запрос id={}", requestId);
     }
 }
 

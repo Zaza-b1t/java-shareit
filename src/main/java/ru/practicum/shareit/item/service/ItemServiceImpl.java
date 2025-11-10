@@ -30,7 +30,7 @@ public class ItemServiceImpl implements ItemService {
             throw new EntityNotFoundException("Пользователь с ID = " + ownerId + " не найден.");
         }
         Item saved = itemStorage.create(itemMapper.toItem(dto, ownerId));
-        log.debug("Создана вещь id={} для ownerId={}", saved.getId(), ownerId);
+        log.info("Создана вещь id={} для ownerId={}", saved.getId(), ownerId);
         return itemMapper.toItemDto(saved);
     }
 
@@ -44,7 +44,7 @@ public class ItemServiceImpl implements ItemService {
         Item toUpdate = itemMapper.toItem(dto, ownerId);
         toUpdate.setId(itemId);
         Item updated = itemStorage.update(itemId, toUpdate);
-        log.debug("Вещь id={} обновлена пользователем ownerId={}", itemId, ownerId);
+        log.info("Вещь id={} обновлена пользователем ownerId={}", itemId, ownerId);
         return itemMapper.toItemDto(updated);
     }
 
@@ -56,7 +56,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getByOwner(long ownerId) {
-        log.debug("Получение списка вещей по ownerId={}", ownerId);
+        log.info("Получение списка вещей по ownerId={}", ownerId);
         return itemStorage.getByOwner(ownerId).stream()
                 .map(itemMapper::toItemDto)
                 .collect(Collectors.toList());
@@ -70,12 +70,12 @@ public class ItemServiceImpl implements ItemService {
             throw new ValidationException("Удалять вещь может только владелец.");
         }
         itemStorage.delete(itemId);
-        log.debug("Вещь id={} удалена пользователем ownerId={}", itemId, ownerId);
+        log.info("Вещь id={} удалена пользователем ownerId={}", itemId, ownerId);
     }
 
     @Override
     public Collection<ItemDto> search(String text) {
-        log.debug("Поиск вещей по тексту='{}'", text);
+        log.info("Поиск вещей по тексту='{}'", text);
         return itemStorage.search(text).stream()
                 .map(itemMapper::toItemDto)
                 .collect(Collectors.toList());
@@ -105,7 +105,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         Item updated = itemStorage.update(itemId, existing);
-        log.debug("Вещь id={} частично обновлена пользователем ownerId={}", itemId, ownerId);
+        log.info("Вещь id={} частично обновлена пользователем ownerId={}", itemId, ownerId);
         return itemMapper.toItemDto(updated);
     }
 

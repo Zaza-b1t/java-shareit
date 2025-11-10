@@ -27,7 +27,7 @@ public class InMemoryBookingStorage implements BookingStorage {
 
     @Override
     public Booking update(long id, Booking booking) {
-        if (!bookings.containsKey(id)) {
+        if (!exists(id)) {
             throw new EntityNotFoundException("Бронь с ID = " + id + " не найдена");
         }
         booking.setId(id);
@@ -37,7 +37,7 @@ public class InMemoryBookingStorage implements BookingStorage {
 
     @Override
     public Booking getById(long id) {
-        if (!bookings.containsKey(id)) {
+        if (!exists(id)) {
             throw new EntityNotFoundException("Бронь с ID = " + id + " не найдена");
         }
         return bookings.get(id);
@@ -60,7 +60,6 @@ public class InMemoryBookingStorage implements BookingStorage {
         Collection<Item> ownerItems = itemStorage.getByOwner(ownerId);
         if (ownerItems.isEmpty()) return List.of();
 
-        // 2) собираем их id
         Set<Long> itemIds = ownerItems.stream()
                 .map(Item::getId)
                 .filter(Objects::nonNull)
@@ -74,10 +73,15 @@ public class InMemoryBookingStorage implements BookingStorage {
 
     @Override
     public void delete(long id) {
-        if (!bookings.containsKey(id)) {
+        if (!exists(id)) {
             throw new EntityNotFoundException("Бронь с ID = " + id + " не найдена");
         }
         bookings.remove(id);
+    }
+
+    @Override
+    public boolean exists(long id) {
+        return bookings.containsKey(id);
     }
 
     private long genNextId() {

@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
         }
         User toSave = userMapper.toUser(userDto);
         User saved = userStorage.create(toSave);
-        log.debug("Создан пользователь id={} email={}", saved.getId(), saved.getEmail());
+        log.info("Создан пользователь id={} email={}", saved.getId(), saved.getEmail());
         return userMapper.toUserDto(saved);
     }
 
@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User updated = userStorage.update(id, existing);
-        log.debug("Пользователь id={} обновлён", id);
+        log.info("Пользователь id={} обновлён", id);
         return userMapper.toUserDto(updated);
     }
 
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
         User toUpdate = userMapper.toUser(userDto);
         toUpdate.setId(id);
         User updated = userStorage.update(id, toUpdate);
-        log.debug("Пользователь id={} полностью обновлён", id);
+        log.info("Пользователь id={} полностью обновлён", id);
         return userMapper.toUserDto(updated);
     }
 
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<UserDto> getAll() {
-        log.debug("Получение списка всех пользователей");
+        log.info("Получение списка всех пользователей");
         Collection<User> users = userStorage.getAll();
         if (users.isEmpty()) {
             log.warn("Список пользователей пуст");
@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
     public void delete(long id) {
         log.info("Удаление пользователя id={}", id);
         userStorage.delete(id);
-        log.debug("Пользователь id={} удалён", id);
+        log.info("Пользователь id={} удалён", id);
     }
 }
 
