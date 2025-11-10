@@ -33,7 +33,7 @@ public class InMemoryItemStorage implements ItemStorage{
     public Item getById(long id) {
         if(!exists(id)) {
             throw new EntityNotFoundException("Вещь с ID = " + id + " не найден.");
-        };
+        }
         return items.get(id);
     }
 
