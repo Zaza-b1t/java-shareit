@@ -51,7 +51,7 @@ public class InMemoryBookingStorage implements BookingStorage {
     @Override
     public Collection<Booking> getByBooker(long bookerId) {
         return bookings.values().stream()
-                .filter(booking -> booking.getBookerId() == bookerId)
+                .filter(booking -> booking.getBooker().getId() == bookerId)
                 .collect(Collectors.toList());
     }
 
@@ -67,7 +67,7 @@ public class InMemoryBookingStorage implements BookingStorage {
         if (itemIds.isEmpty()) return List.of();
 
         return bookings.values().stream()
-                .filter(b -> itemIds.contains(b.getItemId()))
+                .filter(b -> itemIds.contains(b.getItem().getId()))
                 .collect(Collectors.toList());
     }
 
