@@ -100,9 +100,6 @@ public class ItemServiceImpl implements ItemService {
         return dto;
     }
 
-
-
-
     @Override
     public ItemDto update(long ownerId, long itemId, ItemDto dto) {
         log.info("Обновление вещи id={} пользователем ownerId={}", itemId, ownerId);
