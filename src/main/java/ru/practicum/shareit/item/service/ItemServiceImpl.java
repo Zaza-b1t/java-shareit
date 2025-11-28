@@ -41,61 +41,52 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(long ownerId, ItemDto dto) {
-        log.info("Создание вещи пользователем ownerId={}", ownerId);
-        if (!userRepository.existsById(ownerId)) {
-            throw new EntityNotFoundException("Пользователь с ID = " + ownerId + " не найден.");
-        }
-        Item saved = itemRepository.save(itemMapper.toItem(dto, ownerId));
-        log.info("Создана вещь id={} для ownerId={}", saved.getId(), ownerId);
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
+
+        Item item = itemMapper.toItem(dto, owner);
+        Item saved = itemRepository.save(item);
+
         return itemMapper.toItemDto(saved);
     }
 
     @Override
     public ItemDto getById(long itemId, long userId) {
+        log.info("Получение вещи по id={}", itemId);
+
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Вещь не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException("Вещь с ID = " + itemId + " не найдена."));
 
         ItemDto dto = itemMapper.toItemDto(item);
 
-        List<Comment> comments = commentRepository.findAllByItemIdOrderByCreatedAsc(itemId);
-
-        List<CommentDto> commentDtos = new ArrayList<>();
-        for (Comment c : comments) {
-            User author = userRepository.findById(c.getAuthorId())
-                    .orElseThrow(() -> new EntityNotFoundException("Автор комментария не найден"));
-            commentDtos.add(commentMapper.toDto(c, author));
-        }
+        List<Comment> comments = commentRepository.findAllByItem_IdOrderByCreatedAsc(itemId);
+        List<CommentDto> commentDtos = comments.stream()
+                .map(commentMapper::toDto)
+                .toList();
         dto.setComments(commentDtos);
 
-        if (!Objects.equals(item.getOwnerId(), userId)) {
+        if (item.getOwner() == null || !item.getOwner().getId().equals(userId)) {
             return dto;
         }
 
         List<Booking> bookings = bookingRepository
-                .findAllByItem_IdAndStatusOrderByStartDesc(itemId, BookingStatus.APPROVED);
+                .findAllByItem_IdInAndStatusOrderByStartDesc(List.of(itemId), BookingStatus.APPROVED);
 
         LocalDateTime now = LocalDateTime.now();
 
-        Booking last = null;
-        Booking next = null;
+        bookings.stream()
+                .filter(b -> !b.getStart().isAfter(now))
+                .max(Comparator.comparing(Booking::getStart))
+                .ifPresent(b -> dto.setLastBooking(
+                        new BookingShortDto(b.getId(), b.getBooker().getId())
+                ));
 
-        for (Booking b : bookings) {
-            if (!b.getStart().isAfter(now)) { // start <= now
-                if (last == null || b.getStart().isAfter(last.getStart())) {
-                    last = b;
-                }
-            } else {
-                if (next == null || b.getStart().isBefore(next.getStart())) {
-                    next = b;
-                }
-            }
-        }
-
-        if (last != null)
-            dto.setLastBooking(new BookingShortDto(last.getId(), last.getBooker().getId()));
-
-        if (next != null)
-            dto.setNextBooking(new BookingShortDto(next.getId(), next.getBooker().getId()));
+        bookings.stream()
+                .filter(b -> b.getStart().isAfter(now))
+                .min(Comparator.comparing(Booking::getStart))
+                .ifPresent(b -> dto.setNextBooking(
+                        new BookingShortDto(b.getId(), b.getBooker().getId())
+                ));
 
         return dto;
     }
@@ -104,7 +95,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto update(long ownerId, long itemId, ItemDto dto) {
         log.info("Обновление вещи id={} пользователем ownerId={}", itemId, ownerId);
         Item existing = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException("Вещь с ID = " + itemId + " не найдена"));
-        if (!existing.getOwnerId().equals(ownerId)) {
+        if (!existing.getOwner().getId().equals(ownerId)) {
             throw new ValidationException("Редактировать вещь может только владелец");
         }
         existing.setName(dto.getName());
@@ -119,7 +110,7 @@ public class ItemServiceImpl implements ItemService {
     public void delete(long ownerId, long itemId) {
         log.info("Удаление вещи id={} пользователем ownerId={}", itemId, ownerId);
         Item existing = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException("Вещь с ID = " + itemId + " не найдена"));
-        if (!existing.getOwnerId().equals(ownerId)) {
+        if (!existing.getOwner().getId().equals(ownerId)) {
             throw new ValidationException("Удалять вещь может только владелец.");
         }
         itemRepository.deleteById(itemId);
@@ -128,54 +119,67 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getByOwner(long ownerId) {
+        log.info("Получение списка вещей по ownerId={}", ownerId);
+
         if (!userRepository.existsById(ownerId)) {
-            throw new EntityNotFoundException("Пользователь не найден");
+            throw new EntityNotFoundException("Пользователь с ID = " + ownerId + " не найден.");
         }
 
-        List<Item> items = itemRepository.findAllByOwnerId(ownerId);
-        List<ItemDto> result = new ArrayList<>();
+        List<Item> items = itemRepository.findAllByOwner_Id(ownerId);
+        if (items.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> itemIds = items.stream()
+                .map(Item::getId)
+                .toList();
+
+        List<Booking> bookings = bookingRepository
+                .findAllByItem_IdInAndStatusOrderByStartDesc(itemIds, BookingStatus.APPROVED);
+
+        Map<Long, List<Booking>> bookingsByItem = bookings.stream()
+                .collect(Collectors.groupingBy(b -> b.getItem().getId()));
+
+        List<Comment> allComments = commentRepository
+                .findAllByItem_IdInOrderByCreatedAsc(itemIds);
+
+        Map<Long, List<Comment>> commentsByItem = allComments.stream()
+                .collect(Collectors.groupingBy(c -> c.getItem().getId()));
 
         LocalDateTime now = LocalDateTime.now();
 
-        for (Item item : items) {
-            ItemDto dto = itemMapper.toItemDto(item);
-            List<Comment> comments = commentRepository.findAllByItemIdOrderByCreatedAsc(item.getId());
-            List<CommentDto> commentDtos = new ArrayList<>();
-            for (Comment c : comments) {
-                User author = userRepository.findById(c.getAuthorId())
-                        .orElseThrow(() -> new EntityNotFoundException("Автор комментария не найден"));
-                commentDtos.add(commentMapper.toDto(c, author));
-            }
-            dto.setComments(commentDtos);
+        return items.stream()
+                .map(item -> {
+                    ItemDto dto = itemMapper.toItemDto(item);
 
-            List<Booking> bookings = bookingRepository
-                    .findAllByItem_IdAndStatusOrderByStartDesc(item.getId(), BookingStatus.APPROVED);
+                    List<Booking> itemBookings =
+                            bookingsByItem.getOrDefault(item.getId(), List.of());
 
-            Booking last = null;
-            Booking next = null;
+                    itemBookings.stream()
+                            .filter(b -> !b.getStart().isAfter(now))
+                            .max(Comparator.comparing(Booking::getStart))
+                            .ifPresent(b -> dto.setLastBooking(
+                                    new BookingShortDto(b.getId(), b.getBooker().getId())
+                            ));
 
-            for (Booking b : bookings) {
-                if (!b.getStart().isAfter(now)) {
-                    if (last == null || b.getStart().isAfter(last.getStart())) {
-                        last = b;
-                    }
-                } else {
-                    if (next == null || b.getStart().isBefore(next.getStart())) {
-                        next = b;
-                    }
-                }
-            }
+                    itemBookings.stream()
+                            .filter(b -> b.getStart().isAfter(now))
+                            .min(Comparator.comparing(Booking::getStart))
+                            .ifPresent(b -> dto.setNextBooking(
+                                    new BookingShortDto(b.getId(), b.getBooker().getId())
+                            ));
 
-            if (last != null)
-                dto.setLastBooking(new BookingShortDto(last.getId(), last.getBooker().getId()));
+                    List<CommentDto> commentDtos = commentsByItem
+                            .getOrDefault(item.getId(), List.of())
+                            .stream()
+                            .map(commentMapper::toDto)
+                            .toList();
 
-            if (next != null)
-                dto.setNextBooking(new BookingShortDto(next.getId(), next.getBooker().getId()));
+                    dto.setComments(commentDtos);
 
-            result.add(dto);
-        }
-
-        return result;
+                    return dto;
+                })
+                .toList();
     }
 
     @Override
@@ -196,7 +200,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto patch(long ownerId, long itemId, ItemDto dto) {
         log.info("Частичное обновление вещи id={} пользователем ownerId={}", itemId, ownerId);
         Item existing = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException("Вещь с ID = " + itemId + " не найдена"));
-        if (!existing.getOwnerId().equals(ownerId)) {
+        if (!existing.getOwner().getId().equals(ownerId)) {
             throw new EntityNotFoundException("Редактировать вещь может только владелец.");
         }
 
@@ -227,21 +231,18 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(long authorId, long itemId, CommentCreateDto dto) {
-
-        if (!userRepository.existsById(authorId)) {
-            throw new EntityNotFoundException("Пользователь не найден");
-        }
+        User author = userRepository.findById(authorId)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Вещь не найдена"));
 
-        LocalDateTime now = LocalDateTime.now();
         boolean hasCompletedBooking = bookingRepository
-                .findAllByBooker_IdOrderByStartDesc(authorId).stream()
-                .anyMatch(b ->
-                        b.getItem().getId().equals(itemId) &&
-                                b.getEnd().isBefore(now) &&
-                                b.getStatus() == BookingStatus.APPROVED
+                .existsByBooker_IdAndItem_IdAndEndBeforeAndStatus(
+                        authorId,
+                        itemId,
+                        LocalDateTime.now(),
+                        BookingStatus.APPROVED
                 );
 
         if (!hasCompletedBooking) {
@@ -250,15 +251,11 @@ public class ItemServiceImpl implements ItemService {
 
         Comment comment = new Comment();
         comment.setText(dto.getText());
-        comment.setItemId(itemId);
-        comment.setAuthorId(authorId);
+        comment.setItem(item);
+        comment.setAuthor(author);
         comment.setCreated(LocalDateTime.now());
 
         Comment saved = commentRepository.save(comment);
-
-        User author = userRepository.findById(authorId).get();
-        return commentMapper.toDto(saved, author);
+        return commentMapper.toDto(saved);
     }
-
-
 }

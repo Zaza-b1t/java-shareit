@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DuplicateEmailException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.InternalServerErrorException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -80,10 +81,10 @@ public class UserServiceImpl implements UserService {
         if (dto.getEmail() != null) {
             String newEmail = dto.getEmail();
 
-            if (!newEmail.equalsIgnoreCase(existing.getEmail())) {
-                Optional<User> userWithEmail = repository.findByEmailIgnoreCase(newEmail);
-                if (userWithEmail.isPresent() && !userWithEmail.get().getId().equals(existing.getId())) {
-                    throw new DuplicateEmailException("Пользователь с таким email уже существует.");
+            if (newEmail != null && !newEmail.equalsIgnoreCase(existing.getEmail())) {
+                boolean emailTaken = repository.existsByEmailIgnoreCaseAndIdNot(newEmail, existing.getId());
+                if (emailTaken) {
+                    throw new InternalServerErrorException("Пользователь с таким email уже существует");
                 }
                 existing.setEmail(newEmail);
             }

@@ -24,5 +24,4 @@ public interface ItemService {
     boolean existsById(long id);
 
     CommentDto addComment(long authorId, long itemId, CommentCreateDto dto);
-
 }

@@ -43,7 +43,7 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("Вещь недоступна для бронирования.");
         }
 
-        if (item.getOwnerId().equals(bookerId)) {
+        if (item.getOwner().getId().equals(bookerId)) {
             throw new EntityNotFoundException("Владелец не может бронировать свою вещь.");
         }
 
@@ -67,7 +67,7 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemRepository.findById(booking.getItem().getId()).orElseThrow(() -> new EntityNotFoundException("Вещь с ID = " +
                 booking.getItem().getId() + " не найден."));
 
-        if (item.getOwnerId() == null || !item.getOwnerId().equals(ownerId)) {
+        if (item.getOwner().getId() == null || !item.getOwner().getId().equals(ownerId)) {
             throw new ValidationException("Подтверждать/отклонять бронь может только владелец вещи.");
         }
 
@@ -91,7 +91,7 @@ public class BookingServiceImpl implements BookingService {
         Item item = booking.getItem();
 
         boolean isBooker = booking.getBooker().getId().equals(userId);
-        boolean isOwner = item.getOwnerId() != null && item.getOwnerId().equals(userId);
+        boolean isOwner = item.getOwner().getId() != null && item.getOwner().getId().equals(userId);
 
         if (!isBooker && !isOwner) {
             throw new ValidationException("Недостаточно прав для просмотра этой брони.");
@@ -101,69 +101,84 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingDto> getByBooker(long bookerId, String stateText) {
+    public Collection<BookingDto> getByBooker(long bookerId, BookingState state) {
 
         if (!userRepository.existsById(bookerId)) {
             throw new EntityNotFoundException("Пользователь не найден");
         }
 
-        String normalized = stateText == null ? "ALL" : stateText.toUpperCase();
+        LocalDateTime now = LocalDateTime.now();
+        List<Booking> bookings;
 
-        BookingState state;
-        try {
-            state = BookingState.valueOf(normalized);
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException("Unknown state: " + stateText);
+        switch (state) {
+            case ALL -> bookings =
+                    bookingRepository.findAllByBooker_IdOrderByStartDesc(bookerId);
+            case CURRENT -> bookings =
+                    bookingRepository.findAllByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(
+                            bookerId, now, now
+                    );
+            case PAST -> bookings =
+                    bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(
+                            bookerId, now
+                    );
+            case FUTURE -> bookings =
+                    bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(
+                            bookerId, now
+                    );
+            case WAITING -> bookings =
+                    bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(
+                            bookerId, BookingStatus.WAITING
+                    );
+            case REJECTED -> bookings =
+                    bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(
+                            bookerId, BookingStatus.REJECTED
+                    );
+            default -> throw new ValidationException("Unknown state: " + state);
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        List<Booking> list = bookingRepository.findAllByBooker_IdOrderByStartDesc(bookerId);
-
-        return list.stream()
-                .filter(b -> switch (state) {
-                    case ALL -> true;
-                    case CURRENT -> b.getStart().isBefore(now) && b.getEnd().isAfter(now);
-                    case PAST -> b.getEnd().isBefore(now);
-                    case FUTURE -> b.getStart().isAfter(now);
-                    case WAITING -> b.getStatus() == BookingStatus.WAITING;
-                    case REJECTED -> b.getStatus() == BookingStatus.REJECTED;
-                })
+        return bookings.stream()
                 .map(bookingMapper::toDto)
                 .toList();
     }
 
     @Override
-    public Collection<BookingDto> getByOwner(long ownerId, String stateText) {
-        log.info("Получение списка бронирований по ownerId={} с state={}", ownerId, stateText);
+    public Collection<BookingDto> getByOwner(long ownerId, BookingState state) {
 
         if (!userRepository.existsById(ownerId)) {
-            throw new EntityNotFoundException("Пользователь с ID = " + ownerId + " не найден.");
+            throw new EntityNotFoundException("Пользователь не найден");
         }
 
-        String normalized = (stateText == null) ? "ALL" : stateText.toUpperCase();
-
-        BookingState state;
-        try {
-            state = BookingState.valueOf(normalized);
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException("Unknown state: " + stateText);
-        }
-
-        List<Booking> all = bookingRepository.findAllByItem_OwnerIdOrderByStartDesc(ownerId);
         LocalDateTime now = LocalDateTime.now();
+        List<Booking> bookings;
 
-        return all.stream()
-                .filter(b -> switch (state) {
-                    case ALL -> true;
-                    case CURRENT -> b.getStart().isBefore(now) && b.getEnd().isAfter(now);
-                    case PAST -> b.getEnd().isBefore(now);
-                    case FUTURE -> b.getStart().isAfter(now);
-                    case WAITING -> b.getStatus() == BookingStatus.WAITING;
-                    case REJECTED -> b.getStatus() == BookingStatus.REJECTED;
-                })
+        switch (state) {
+            case ALL -> bookings =
+                    bookingRepository.findAllByItem_Owner_IdOrderByStartDesc(ownerId);
+            case CURRENT -> bookings =
+                    bookingRepository.findAllByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(
+                            ownerId, now, now
+                    );
+            case PAST -> bookings =
+                    bookingRepository.findAllByItem_Owner_IdAndEndBeforeOrderByStartDesc(
+                            ownerId, now
+                    );
+            case FUTURE -> bookings =
+                    bookingRepository.findAllByItem_Owner_IdAndStartAfterOrderByStartDesc(
+                            ownerId, now
+                    );
+            case WAITING -> bookings =
+                    bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(
+                            ownerId, BookingStatus.WAITING
+                    );
+            case REJECTED -> bookings =
+                    bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(
+                            ownerId, BookingStatus.REJECTED
+                    );
+            default -> throw new ValidationException("Unknown state: " + state);
+        }
+
+        return bookings.stream()
                 .map(bookingMapper::toDto)
                 .toList();
     }
-
-
 }
