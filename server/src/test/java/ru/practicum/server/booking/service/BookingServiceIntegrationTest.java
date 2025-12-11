@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.server.booking.dto.BookingDto;
 import ru.practicum.server.booking.model.BookingStatus;
-import ru.practicum.server.booking.service.BookingService;
 import ru.practicum.server.item.model.Item;
 import ru.practicum.server.item.repository.ItemRepository;
 import ru.practicum.server.user.model.User;

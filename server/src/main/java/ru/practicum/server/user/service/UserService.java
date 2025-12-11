@@ -2,7 +2,6 @@ package ru.practicum.server.user.service;
 
 import ru.practicum.server.user.dto.UserDto;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface UserService {

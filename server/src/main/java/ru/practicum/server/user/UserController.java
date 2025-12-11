@@ -1,13 +1,11 @@
 package ru.practicum.server.user;
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.server.user.dto.UserDto;
 import ru.practicum.server.user.service.UserService;
 
-import java.util.Collection;
 import java.util.List;
 
 /**

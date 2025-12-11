@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.server.user.dto.UserDto;
 import ru.practicum.server.user.model.User;
 import ru.practicum.server.user.repository.UserRepository;
-import ru.practicum.server.user.service.UserService;
 
 import java.util.List;
 
