@@ -31,13 +31,13 @@ class CommentDtoJsonTest {
     @Test
     void testDeserialize() throws Exception {
         String jsonText = """
-        {
+{
           "id": 1,
           "text": "comment",
           "authorName": "user",
           "created": "2030-01-01T12:00:00"
-        }
-        """;
+}
+""";
 
         CommentDto dto = json.parseObject(jsonText);
 

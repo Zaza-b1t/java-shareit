@@ -6,7 +6,6 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import ru.practicum.server.booking.model.BookingStatus;
 
-
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,15 +38,15 @@ public class BookingDtoJsonTest {
     @Test
     void testDeserialize() throws Exception {
         String jsonString = """
-        {
-            "id": 1,
-            "start": "2030-01-01T12:00:00",
-            "end": "2030-01-01T13:00:00",
-            "itemId": 5,
-            "bookerId": 7,
-            "status": "WAITING"
-        }
-        """;
+{
+    "id": 1,
+    "start": "2030-01-01T12:00:00",
+    "end": "2030-01-01T13:00:00",
+    "itemId": 5,
+    "bookerId": 7,
+    "status": "WAITING"
+}
+""";
 
         BookingDto dto = json.parseObject(jsonString);
 

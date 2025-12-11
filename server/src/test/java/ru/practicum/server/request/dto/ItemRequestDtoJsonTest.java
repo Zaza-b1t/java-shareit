@@ -40,15 +40,15 @@ class ItemRequestDtoJsonTest {
     @Test
     void testDeserialize() throws Exception {
         String jsonText = """
-        {
+{
           "id": 2,
           "description": "Тест",
           "created": "2030-01-01T12:00:00",
           "items": [
             { "id": 10, "name": "Вещь", "ownerId": 3 }
           ]
-        }
-        """;
+}
+""";
 
         ItemRequestDto dto = json.parseObject(jsonText);
 
