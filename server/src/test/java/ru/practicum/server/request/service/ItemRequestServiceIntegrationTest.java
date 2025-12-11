@@ -52,7 +52,11 @@ class ItemRequestServiceIntegrationTest {
     @Test
     void testGetOwnRequests() {
         requestService.create(requester.getId(), new ItemRequestDto(null, "Первый", null, List.of()));
-        try { Thread.sleep(10); } catch (Exception ignored) {}
+        try {
+            Thread.sleep(20);
+        } catch (InterruptedException ignored) {
+        }
+
         requestService.create(requester.getId(), new ItemRequestDto(null, "Второй", null, List.of()));
 
         List<ItemRequestDto> list = requestService.getOwn(requester.getId());
@@ -64,8 +68,10 @@ class ItemRequestServiceIntegrationTest {
 
     @Test
     void testGetByIdWithItems() {
-        ItemRequestDto reqDto = requestService.create(requester.getId(),
-                new ItemRequestDto(null, "Нужна дрель", null, List.of()));
+        ItemRequestDto reqDto = requestService.create(
+                requester.getId(),
+                new ItemRequestDto(null, "Нужна дрель", null, List.of())
+        );
 
         Item item = new Item();
         item.setName("Дрель");
