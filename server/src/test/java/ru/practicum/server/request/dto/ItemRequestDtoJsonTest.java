@@ -30,8 +30,7 @@ class ItemRequestDtoJsonTest {
 
         assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
         assertThat(result).extractingJsonPathStringValue("$.description").isEqualTo("Описание");
-        assertThat(result).extractingJsonPathStringValue("$.created")
-                .isEqualTo("2030-01-01T12:00:00");
+        assertThat(result).extractingJsonPathStringValue("$.created").isEqualTo("2030-01-01T12:00:00");
         assertThat(result).extractingJsonPathNumberValue("$.items[0].id").isEqualTo(10);
         assertThat(result).extractingJsonPathStringValue("$.items[0].name").isEqualTo("Дрель");
         assertThat(result).extractingJsonPathNumberValue("$.items[0].ownerId").isEqualTo(99);
@@ -41,12 +40,12 @@ class ItemRequestDtoJsonTest {
     void testDeserialize() throws Exception {
         String jsonText = """
 {
-          "id": 2,
-          "description": "Тест",
-          "created": "2030-01-01T12:00:00",
-          "items": [
-            { "id": 10, "name": "Вещь", "ownerId": 3 }
-          ]
+    "id": 2,
+    "description": "Тест",
+    "created": "2030-01-01T12:00:00",
+    "items": [
+        { "id": 10, "name": "Вещь", "ownerId": 3 }
+    ]
 }
 """;
 

@@ -28,10 +28,10 @@ class ItemDtoJsonTest {
     void testDeserialize() throws Exception {
         String content = """
 {
-          "id": 1,
-          "name": "Дрель",
-          "description": "Описание",
-          "available": true
+    "id": 1,
+    "name": "Дрель",
+    "description": "Описание",
+    "available": true
 }
 """;
 

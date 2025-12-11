@@ -28,9 +28,9 @@ class UserDtoJsonTest {
     void testDeserialize() throws Exception {
         String jsonText = """
 {
-          "id": 10,
-          "name": "Bob",
-          "email": "bob@mail.ru"
+    "id": 10,
+    "name": "Bob",
+    "email": "bob@mail.ru"
 }
 """;
 
