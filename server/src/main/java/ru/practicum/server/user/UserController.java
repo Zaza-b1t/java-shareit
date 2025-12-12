@@ -1,6 +1,5 @@
 package ru.practicum.server.user;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.server.user.dto.UserDto;
@@ -22,7 +21,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto create(@Valid @RequestBody UserDto userDto) {
+    public UserDto create(@RequestBody UserDto userDto) {
         log.info("Создание пользователя: {}", userDto);
         return userService.create(userDto);
     }

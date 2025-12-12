@@ -2,7 +2,6 @@ package ru.practicum.server.item;
 
 import java.util.List;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +31,7 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto create(@RequestHeader(ownerIdHeader) Long ownerId, @Valid @RequestBody ItemDto itemDto) {
+    public ItemDto create(@RequestHeader(ownerIdHeader) Long ownerId,@RequestBody ItemDto itemDto) {
         log.info("Создание вещи: {}", itemDto);
         return itemService.create(ownerId, itemDto);
     }
@@ -65,7 +64,7 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(@RequestHeader(ownerIdHeader) Long authorId,
                                  @PathVariable Long itemId,
-                                 @Valid @RequestBody CommentDto commentDto) {
+                                 @RequestBody CommentDto commentDto) {
         log.info("Добавление комментария к вещи {} пользователем {}", itemId, authorId);
         return itemService.addComment(authorId, itemId, commentDto);
     }

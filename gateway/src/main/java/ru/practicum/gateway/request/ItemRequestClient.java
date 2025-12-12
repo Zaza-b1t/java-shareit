@@ -1,28 +1,15 @@
 package ru.practicum.gateway.request;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.client.RestTemplate;
 import ru.practicum.gateway.client.BaseClient;
 import ru.practicum.gateway.request.dto.ItemRequestDto;
 
-@Service
 public class ItemRequestClient extends BaseClient {
-    private static final String API_PREFIX = "/requests";
+    public static final String API_PREFIX = "/requests";
 
-    public ItemRequestClient(
-            @Value("${shareit-server.url:http://localhost:9090}") String serverUrl,
-            RestTemplateBuilder builder
-    ) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
-                        .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
-                        .build()
-        );
+    public ItemRequestClient(RestTemplate restTemplate) {
+        super(restTemplate);
     }
 
     public ResponseEntity<Object> create(long userId, ItemRequestDto itemRequestDto) {

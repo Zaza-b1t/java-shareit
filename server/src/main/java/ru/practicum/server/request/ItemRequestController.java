@@ -1,6 +1,5 @@
 package ru.practicum.server.request;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.server.request.dto.ItemRequestDto;
@@ -22,7 +21,7 @@ public class ItemRequestController {
 
     @PostMapping
     public ItemRequestDto create(@RequestHeader(userIdHeader) Long userId,
-                                 @Valid @RequestBody ItemRequestDto itemRequestDto) {
+                                 @RequestBody ItemRequestDto itemRequestDto) {
         log.info("Пользователь {} создаёт запрос вещи: {}", userId, itemRequestDto.getDescription());
         return itemRequestService.create(userId, itemRequestDto);
     }

@@ -1,7 +1,6 @@
 package ru.practicum.server.booking;
 
 import java.util.List;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,7 +26,7 @@ public class BookingController {
     }
 
     @PostMapping
-    public BookingDto create(@RequestHeader(userIdHeader) Long userId, @Valid @RequestBody BookingDto bookingDto) {
+    public BookingDto create(@RequestHeader(userIdHeader) Long userId, @RequestBody BookingDto bookingDto) {
         log.info("Создание бронирования пользователем {}: {}", userId, bookingDto);
         return bookingService.create(userId, bookingDto);
     }
